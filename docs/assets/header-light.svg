@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+  <title id="title">F1 Calendar</title>
+  <desc id="desc">Flutter F1 calendar and constructor standings application</desc>
+  <defs>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0067C0"/>
+      <stop offset="1" stop-color="#4C9BE8"/>
+    </linearGradient>
+    <pattern id="checks" width="36" height="36" patternUnits="userSpaceOnUse">
+      <rect width="36" height="36" fill="#FFFFFF"/>
+      <rect width="18" height="18" fill="#1A1A1A"/>
+      <rect x="18" y="18" width="18" height="18" fill="#1A1A1A"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="420" rx="28" fill="#F3F3F3"/>
+  <circle cx="1030" cy="60" r="250" fill="#E8F1FA"/>
+  <path d="M860 -40 L1260 -40 L1260 460 L650 460 Z" fill="url(#accent)"/>
+  <path d="M1010 -20 C780 110 1150 190 850 440" fill="none" stroke="#FFFFFF" stroke-opacity=".24" stroke-width="92"/>
+  <path d="M1010 -20 C780 110 1150 190 850 440" fill="none" stroke="#FFFFFF" stroke-opacity=".85" stroke-width="3" stroke-dasharray="16 16"/>
+  <rect x="1072" y="42" width="88" height="108" rx="8" fill="url(#checks)" transform="rotate(12 1072 42)"/>
+  <rect x="64" y="58" width="240" height="36" rx="18" fill="#E8F1FA"/>
+  <text x="184" y="82" text-anchor="middle" fill="#0067C0" font-family="Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="1.5">FLUTTER · MATERIAL 3</text>
+  <text x="64" y="186" fill="#1A1A1A" font-family="Arial, sans-serif" font-size="76" font-weight="800" letter-spacing="-2">F1 CALENDAR</text>
+  <text x="68" y="240" fill="#1A1A1A" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="32" font-weight="600">赛历、倒计时与车队积分榜</text>
+  <text x="68" y="287" fill="#6B6B6B" font-family="PingFang SC, Microsoft YaHei, Arial, sans-serif" font-size="21">无需 API Key · 离线缓存 · 深浅色主题 · Android 优先</text>
+  <rect x="66" y="329" width="168" height="42" rx="21" fill="#0067C0"/>
+  <text x="150" y="357" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="16" font-weight="700">OFFLINE FIRST</text>
+  <rect x="248" y="329" width="236" height="42" rx="21" fill="#FFFFFF" stroke="#E5E5E5"/>
+  <text x="366" y="357" text-anchor="middle" fill="#6B6B6B" font-family="Arial, sans-serif" font-size="16" font-weight="700">POWERED BY JOLPICA-F1</text>
+</svg>
