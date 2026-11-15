@@ -1,0 +1,143 @@
+
+
+一、技术选型
+
+Flutter 3.x + Dart 3 + Material 3，Android
+
+- 状态管理：Riverpod（比 Provider 更安全，编译期检查依赖）
+- 路由：go_router（声明式，深链接友好）
+- 网络：dio + retrofit（接口自动生成，少写样板）
+- 模型：freezed + json_serializable（不可变模型 + 自动 fromJson）
+- 本地缓存：Hive（轻量、无需 SQL，缓存赛历和积分足够）
+- 图片：cached_network_image（磁盘缓存 + 占位图 + 淡入）
+- 时间：intl（时区/日期格式化）
+- 图表（可选）：fl_chart，做积分趋势曲线时才需要
+
+Flutter 相对 RN 的最大优势在这里：底部导航、卡片、转场动画都是 Material 现成的，不用自己画，做“简约好看”成本最低。
+
+二、架构分层
+
+建议 Feature-first + Clean Architecture 三层，两个功能各一个 feature 目录，互不依赖：
+
+presentation（UI）  →  domain（实体 + 用例 + 仓库接口）  →  data（API/缓存实现仓库）
+
+- domain 只放纯 Dart，不 import Flutter，方便以后换 UI 或做桌面版
+- data 里一个 RaceRepository、一个 StandingsRepository，内部组合“远程 API + 本地缓存”
+- presentation 用 AsyncNotifier 暴露 AsyncValue<...>，UI 直接 switch 出 loading / error / data 三态
+
+关键设计：缓存过期策略写在 Repository 里，不写在 UI。赛历缓存 24 小时，积分缓存 5 分钟，打开 App 先显缓存再后台刷新（stale-while-revalidate），这样弱网也秒开。
+
+三、目录结构
+
+lib/
+  main.dart
+  app/
+    router.dart            // go_router 路由表
+    theme.dart             // Material3 主题 + 设计 token
+  core/
+    network/dio_client.dart
+    storage/hive_box.dart
+    error/failure.dart
+    utils/date_x.dart      // 下一场比赛、倒计时计算
+  features/
+    calendar/
+      data/  race_api.dart  race_repository_impl.dart  race_cache.dart
+      domain/ race.dart  race_repository.dart  get_next_race.dart
+      presentation/ calendar_page.dart  next_race_card.dart  race_list_tile.dart
+    standings/
+      data/  standings_api.dart  standings_repository_impl.dart
+      domain/ standing.dart  standings_repository.dart
+      presentation/ standings_page.dart  team_standing_tile.dart
+  shared/
+    widgets/  team_color_bar.dart  car_image.dart  section_header.dart
+    models/   team_asset.dart   // 车队 → 车图/头像/主色 映射表
+
+team_asset.dart 是这个 App 的关键技巧：把「车队 ID → 赛车图 URL / 队色 / 车手头像 URL」做成一张静态映射表（Assets 里也能放本地图），UI 只按 ID 取值，换素材只改一处。
+
+四、数据与接口
+
+用 Jolpica-F1（免费、无需 key、Ergast 兼容），两个端点就够：
+
+- 赛历：GET https://api.jolpi.ca/ergast/f1/2026.json
+- 车队积分：GET https://api.jolpi.ca/ergast/f1/2026/constructorStandings.json
+
+“下一场比赛”不用额外接口：拿全季赛历，用本地时间过滤 race.date >= now 取第一条。当前实测就是 第 21 站 拉斯维加斯，11 月 22 日，之后是卡塔尔 11/29、阿布扎比 12/6 收官。
+
+积分榜现状（截至第 20 站）：Mercedes 652 > Ferrari 510 > Red Bull 415 > McLaren 398 > RB 114 > Alpine 69 > Haas 31 > Audi 28 > Williams 12 > Aston 7 > Cadillac 0。
+
+补充两点工程上的注意：
+- 接口有数据滞后（原定 24 站，巴林、沙特已取消，接口现在返回 23 条），所以前端要能容错站点数量变化，别硬编码 24。
+- 加一个 etag/Last-Modified 条件请求，省流量，对弱网友好。
+
+五、页面结构
+
+底部两个 Tab（Material 3 NavigationBar）：
+
+1. 赛历 Tab
+   - 顶部「下一场比赛」大卡片：赛道城市 + 日期 + 倒计时（天/时/分）+ 该站赛道名；卡片背景用对应国家的低饱和渐变
+   - 下方整季赛历列表：月份分组、已赛/未完赛用不同文字色、冲刺赛用小徽标标注
+2. 积分 Tab
+   - 车队积分榜：每行 = 队色竖条 + 队名 + 积分 + 名次变化箭头
+   - 行左侧放赛车缩略图（车图裁切），右侧大数字积分；点某队进详情页（车图全幅 + 两名车手头像）
+
+交互细节建议：Tab 切换用 AnimatedSwitcher 淡入，下拉刷新用 RefreshIndicator，积分变化做数字滚动动画——成本很低但“高级感”全在这。
+
+六、视觉规范（这是你想要的“好看简约”）
+
+- 底色 #F3F3F3（Windows 11 的窗口底），卡片纯白，圆角 12px，阴影 0 1 3 rgba(0,0,0,.06)（很淡，不要 Material 默认那种重阴影）
+- 强调色 #0067C0（Windows 蓝）或 #2196F3（Material 蓝），二选一，别混用
+- 字体：Segoe UI Variable（Windows）→ 移动端回退 Inter / Roboto；数字用 tabular figures，积分对齐才整齐
+- 字号层级只有 4 级：32（大数字）/ 20（标题）/ 15（正文）/ 12（辅助），克制是简约的核心
+- 深色模式用 ColorScheme.dark 自动反色，底色 #1F1F1F、卡片 #2B2B2B
+- 细节：分割线用 1px #E5E5E5，不要用卡片堆叠阴影；每屏最多一个“重色块”
+
+七、图片策略（很重要）
+
+官方车图是 2600×572 的横幅，直接放列表会非常浪费流量。这些 URL 是 Cloudinary 变换地址，把 w_2600 改成 w_600（列表）/ w_1200（详情）即可拿到对应尺寸，画质不变：
+
+.../c_lfill,w_600/q_auto/v1740000001/common/f1/2026/ferrari/2026ferraricarleft.jpg
+
+配合 cached_network_image 的 memCacheWidth 限制解码尺寸，能省 70% 内存。车图统一 BoxFit.contain（白底，别裁切），列表里加 color: Colors.white 底板，视觉才不会碎。
+
+八、开发节奏（建议）
+
+- 第 1 天：项目骨架 + 主题 + 底部导航 + 假数据跑通两个页面
+- 第 2–3 天：Jolpica 接入、模型、Repository + Hive 缓存、三态处理
+- 第 4 天：图片映射表接入、卡片刻度打磨、倒计时逻辑
+- 第 5 天：下拉刷新、错误页、深色模式、真机适配（刘海/安全区）
+
+九、素材地址汇总
+
+赛车图（2026，正侧面、车头朝左、白底，改 w_2600 可调尺寸）
+车型   地址
+W17 梅赛德斯   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/mercedes/2026mercedescarleft.jpg
+RB22 红牛   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/redbullracing/2026redbullracingcarleft.jpg
+SF-26 法拉利   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/ferrari/2026ferraricarleft.jpg
+MCL40 迈凯伦   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/mclaren/2026mclarencarleft.jpg
+AMR26 阿斯顿马丁   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/astonmartin/2026astonmartincarleft.jpg
+FW48 威廉姆斯   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/williams/2026williamscarleft.jpg
+VCARB03 小红牛   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/racingbulls/2026racingbullscarleft.jpg
+VF-26 哈斯   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/haas/2026haascarleft.jpg
+R26 奥迪   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/audi/2026audicarleft.jpg
+MAC-26 凯迪拉克   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/cadillac/2026cadillaccarleft.jpg
+A526 Alpine   https://media.formula1.com/image/upload/c_lfill,w_2600/q_auto/v1740000001/common/f1/2026/alpine/2026alpinecarleft.jpg
+
+车手头像（2026，官方，白底半身像）
+
+梅赛德斯：.../mercedes/georus01/2026mercedesgeorus01right.webp（拉塞尔）、.../mercedes/andant01/2026mercedesandant01right.webp（安东内利）
+红牛：.../redbullracing/maxver01/2026redbullracingmaxver01right.webp（维斯塔潘）、.../redbullracing/isahad01/2026redbullracingisahad01right.webp（哈贾尔）
+法拉利：.../ferrari/lewham01/2026ferrarilewham01right.webp（汉密尔顿）、.../ferrari/chalec01/2026ferrarichalec01right.webp（勒克莱尔）
+迈凯伦：.../mclaren/lannor01/2026mclarenlannor01right.webp（诺里斯）、.../mclaren/oscpia01/2026mclarenoscpia01right.webp（皮亚斯特里）
+阿斯顿马丁：.../astonmartin/feralo01/2026astonmartinferalo01right.webp（阿隆索）、.../astonmartin/lanstr01/2026astonmartinlanstr01right.webp（斯特罗尔）
+威廉姆斯：.../williams/alealb01/2026williamsalealb01right.webp（阿尔本）、.../williams/carsai01/2026williamscarsai01right.webp（塞恩斯）
+小红牛：.../racingbulls/lialaw01/2026racingbullslialaw01right.webp（劳森）、.../racingbulls/arvlin01/2026racingbullsarvlin01right.webp（林德布拉德）
+哈斯：.../haas/olibea01/2026haasolibea01right.webp（贝尔曼）、.../haas/rafcam01/2026haasrafcam01right.webp（卡马拉）
+奥迪：.../audi/nichul01/2026audinichul01right.webp（霍肯伯格）、.../audi/gabbor01/2026audigabbor01right.webp（博托莱托）
+凯迪拉克：.../cadillac/valbot01/2026cadillacvalbot01right.webp（博塔斯）、.../cadillac/serper01/2026cadillacserper01right.webp（佩雷兹）
+Alpine：.../alpine/piegas01/2026alpinepiegas01right.webp（加斯利）、.../alpine/fracol01/2026alpinefracol01right.webp（科拉平托）
+
+⚠️ 上面的 ... 统一补全为 https://media.formula1.com/image/upload/c_lfill,w_440/q_auto/v1740000001/common/f1/2026，即完整格式：https://media.formula1.com/image/upload/c_lfill,w_440/q_auto/v1740000001/common/f1/2026/mercedes/georus01/2026mercedesgeorus01right.webp。头像同样可以改 w_440 到 w_800 取更大图。
+
+出处页（可自行核对或换赛季）：https://www.formula1.com/en/teams/mercedes，把 mercedes 换成 red-bull-racing、ferrari、mclaren、aston-martin、williams、racing-bulls、haas、audi、cadillac、alpine 即可。2025 赛季把路径里的 2026 全换成 2025（索伯是 kicksauber，别用 sauber，会 404）。
+
+（我需要一个基于flutter的赛历，设置两个标签页赛历和积分榜，并且尽可能缓存资源，不要每次都下载，实现无服务器的长期有效服务）
