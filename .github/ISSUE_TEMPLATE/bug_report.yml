@@ -1,0 +1,59 @@
+name: 问题反馈
+description: 报告一个可复现的问题
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请勿在 Issue 中填写令牌、签名密码或其他敏感信息。
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 实际发生了什么？你原本预期什么结果？
+      placeholder: 例如：断网打开赛历时，已有缓存却没有显示。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 请提供最小、明确的操作步骤。
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 应用版本或提交
+      placeholder: 例如：1.0.0+1 或提交 SHA
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: 设备与系统
+      placeholder: 例如：Pixel 9 / Android 16
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: 网络状态
+      options:
+        - 正常联网
+        - 弱网
+        - 断网
+        - 多种状态均出现
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 截图或日志
+      description: 请移除个人信息、路径和凭据。
+      render: text
