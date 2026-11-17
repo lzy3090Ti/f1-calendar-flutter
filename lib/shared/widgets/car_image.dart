@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../app/theme.dart';
 import '../models/team_asset.dart';
 
-/// 赛车图：官方素材是白底横幅，统一白底板 + contain，绝不裁切。
+/// 赛车图：保留官方透明通道，以 contain 显示，避免白色背景板挡住卡片渐变。
 ///
 /// URL 里的 `w_` 决定远端尺寸，`memCacheWidth` 决定解码尺寸，两者配合省流量也省内存。
 class CarImage extends StatelessWidget {
@@ -32,10 +32,6 @@ class CarImage extends StatelessWidget {
     return Container(
       height: height,
       padding: padding,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-      ),
       child: CachedNetworkImage(
         imageUrl: team.carUrl(width: width),
         memCacheWidth: memCacheWidth ?? width,

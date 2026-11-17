@@ -30,11 +30,6 @@ GoRouter createRouter() {
                     _fadePage(const CalendarPage()),
                 routes: <RouteBase>[
                   GoRoute(
-                    path: 'widgets',
-                    pageBuilder: (context, state) =>
-                        _fadePage(const WidgetSettingsPage()),
-                  ),
-                  GoRoute(
                     path: 'race/:round',
                     pageBuilder: (context, state) =>
                         _fadePage(RaceDetailPage(race: state.extra! as Race)),
@@ -50,6 +45,11 @@ GoRouter createRouter() {
                 pageBuilder: (context, state) =>
                     _fadePage(const StandingsPage()),
                 routes: <RouteBase>[
+                  GoRoute(
+                    path: 'widgets',
+                    pageBuilder: (context, state) =>
+                        _fadePage(const WidgetSettingsPage()),
+                  ),
                   GoRoute(
                     path: 'team/:id',
                     pageBuilder: (context, state) => _fadePage(

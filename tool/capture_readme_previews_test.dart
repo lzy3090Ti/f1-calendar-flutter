@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:f1_calendar/app/theme.dart';
 import 'package:f1_calendar/features/calendar/domain/race.dart';

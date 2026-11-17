@@ -29,7 +29,7 @@ class TeamAsset {
 
   /// 官方车图为 Cloudinary 变换地址，改 w_ 即可取合适尺寸。
   String carUrl({int width = 600}) =>
-      'https://media.formula1.com/image/upload/c_lfill,w_$width/q_auto/v1740000001/'
+      'https://media.formula1.com/image/upload/fl_preserve_transparency,c_fit,w_$width/q_auto/v1740000001/'
       'common/f1/$seasonSegment/$slug/$seasonSegment${slug}carleft.jpg';
 
   String get carUrlList => carUrl(width: 600);
@@ -195,6 +195,7 @@ const Map<String, String> _driverCodeById = <String, String>{
   'hamilton': 'lewham01',
   'leclerc': 'chalec01',
   'verstappen': 'maxver01',
+  'max_verstappen': 'maxver01',
   'hadjar': 'isahad01',
   'norris': 'lannor01',
   'piastri': 'oscpia01',
@@ -211,6 +212,35 @@ const Map<String, String> _driverCodeById = <String, String>{
   'stroll': 'lanstr01',
   'bottas': 'valbot01',
   'perez': 'serper01',
+  'arvid_lindblad': 'arvlin01',
+  'tsunoda': 'yuktsu01',
+  'ocon': 'estoco01',
+  'ryo_hirakawa': 'ryohir01',
+  'rafael_camara': 'rafcam01',
+};
+
+const Map<String, DriverAsset> _extraDriverAssetsById = <String, DriverAsset>{
+  'arvid_lindblad': DriverAsset(
+    code: 'arvlin01',
+    name: 'Arvid Lindblad',
+    nameZh: '林德布拉德',
+  ),
+  'tsunoda': DriverAsset(
+    code: 'yuktsu01',
+    name: 'Yuki Tsunoda',
+    nameZh: '角田裕毅',
+  ),
+  'ocon': DriverAsset(code: 'estoco01', name: 'Esteban Ocon', nameZh: '奥康'),
+  'ryo_hirakawa': DriverAsset(
+    code: 'ryohir01',
+    name: 'Ryo Hirakawa',
+    nameZh: '平川亮',
+  ),
+  'rafael_camara': DriverAsset(
+    code: 'rafcam01',
+    name: 'Rafael Camara',
+    nameZh: '卡马拉',
+  ),
 };
 
 /// 未知车队（接口新增或改名）返回灰色兜底，UI 不会因此崩溃。
@@ -232,6 +262,8 @@ DriverAsset? driverAssetFor(String driverId, String constructorId) {
   final team = teamAssetFor(constructorId);
   final code = _driverCodeById[driverId];
   if (code == null) return team.drivers.isEmpty ? null : team.drivers.first;
+  final extra = _extraDriverAssetsById[driverId];
+  if (extra != null) return extra;
   for (final driver in team.drivers) {
     if (driver.code == code) return driver;
   }

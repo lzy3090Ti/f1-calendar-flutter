@@ -154,6 +154,20 @@ void main() {
       expect(unknown.drivers, isEmpty);
     });
 
+    test('2026 车手 ID 映射到正确照片，不回退成贝尔曼', () {
+      expect(driverAssetFor('ryo_hirakawa', 'haas')?.code, 'ryohir01');
+      expect(driverAssetFor('rafael_camara', 'haas')?.code, 'rafcam01');
+      expect(driverAssetFor('ocon', 'haas')?.code, 'estoco01');
+      expect(driverAssetFor('max_verstappen', 'red_bull')?.code, 'maxver01');
+    });
+
+    test('赛车图开启透明通道', () {
+      expect(
+        teamAssetFor('mercedes').carUrlList,
+        contains('fl_preserve_transparency'),
+      );
+    });
+
     test('美国站用城市区分三个分站', () {
       expect(raceTitleZh(buildRace()), '拉斯维加斯大奖赛');
       expect(
