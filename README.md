@@ -1,6 +1,8 @@
 # F1 赛历（f1_calendar）
 
-基于 Flutter 3.x + Dart 3 + Material 3 的 F1 赛历客户端，Android 优先。两个标签页：**赛历** 与 **车队积分榜**，带车队详情页。数据来自 Jolpica-F1（免费、无需 key），不依赖任何自建服务器；全部响应与图片落本地缓存，弱网与断网仍可打开。
+基于 Flutter 3.x + Dart 3 + Material 3 的 F1 赛历客户端，Android 优先。两个标签页：**赛历** 与 **积分榜**，积分榜支持车手 / 车队切换与车队详情页。数据来自 Jolpica-F1（免费、无需 key），不依赖任何自建服务器；全部响应与图片落本地缓存，弱网与断网仍可打开。
+
+积分榜页面右上角的组件按钮可以选择一位车手，并添加两种 Android 主屏小组件：单一车手积分、下一场比赛倒计时。倒计时由 Android 原生 Chronometer 驱动，App 刷新真实赛历数据后同步到桌面。
 
 ## 运行
 
@@ -49,7 +51,8 @@ lib/
                presentation（页面、下一场卡片、赛历行、providers）
     standings/ data（standings_api / response / cache / repository_impl）
                domain（standing 模型、仓库接口）
-               presentation（积分页、积分行、车队详情、providers）
+               presentation（积分页、车手 / 车队海报卡、车队详情、providers）
+    widgets/   widget_settings_page / widget_sync_service（Android 主屏小组件同步）
   shared/
     models/team_asset.dart      车队 → 车图 / 队色 / 车手头像 静态映射
     models/locale_labels.dart   国家与城市中文、赛道短名、分站渐变
@@ -77,7 +80,7 @@ lib/
 
 ```bash
 flutter analyze   # 无问题
-flutter test      # 12 个用例：时间计算、分组、站点数容错、素材映射、分站文案、卡片渲染
+flutter test      # 用例覆盖时间计算、分组、站点数容错、素材映射、接口解析与卡片渲染
 ```
 
 ## 素材说明

@@ -17,6 +17,7 @@ abstract class ConstructorStanding with _$ConstructorStanding {
     required String points,
     required String wins,
     required ConstructorInfo constructor,
+
     /// 与上一轮缓存相比的名次变化：正数为上升，负数为下降，0 为不变。
     @JsonKey(includeFromJson: false, includeToJson: false)
     @Default(0)

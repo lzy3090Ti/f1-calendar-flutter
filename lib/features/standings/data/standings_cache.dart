@@ -49,7 +49,8 @@ class StandingsCache {
       final decoded = jsonDecode(raw.body);
       if (decoded is! Map<String, dynamic>) return <String, int>{};
       return decoded.map(
-        (key, value) => MapEntry(key, value is int ? value : int.tryParse('$value') ?? 0),
+        (key, value) =>
+            MapEntry(key, value is int ? value : int.tryParse('$value') ?? 0),
       );
     } on Object {
       return <String, int>{};
@@ -59,10 +60,7 @@ class StandingsCache {
   Future<void> savePositions(Map<String, int> positions) {
     return _store.write(
       _positionsKey,
-      CachedPayload(
-        body: jsonEncode(positions),
-        fetchedAt: DateTime.now(),
-      ),
+      CachedPayload(body: jsonEncode(positions), fetchedAt: DateTime.now()),
     );
   }
 }

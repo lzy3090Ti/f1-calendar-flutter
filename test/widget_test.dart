@@ -4,6 +4,7 @@ import 'package:f1_calendar/features/calendar/domain/race.dart';
 import 'package:f1_calendar/features/calendar/data/race_response.dart';
 import 'package:f1_calendar/features/calendar/data/race_result_response.dart';
 import 'package:f1_calendar/features/standings/data/standings_response.dart';
+import 'package:f1_calendar/features/standings/data/driver_standings_response.dart';
 import 'package:f1_calendar/features/calendar/presentation/next_race_card.dart';
 import 'package:f1_calendar/shared/models/locale_labels.dart';
 import 'package:f1_calendar/shared/models/team_asset.dart';
@@ -266,6 +267,46 @@ void main() {
     expect(response.rows, hasLength(1));
     expect(response.rows.single.constructorId, 'mercedes');
     expect(response.rows.single.pointsValue, 652);
+  });
+
+  test('Jolpica 车手积分响应能解析 Constructors 字段', () {
+    final response = DriverStandingsResponse.fromJson(<String, dynamic>{
+      'MRData': <String, dynamic>{
+        'StandingsTable': <String, dynamic>{
+          'StandingsLists': <Map<String, dynamic>>[
+            <String, dynamic>{
+              'season': '2026',
+              'round': '20',
+              'DriverStandings': <Map<String, dynamic>>[
+                <String, dynamic>{
+                  'position': '1',
+                  'positionText': '1',
+                  'points': '390',
+                  'wins': '5',
+                  'Driver': <String, dynamic>{
+                    'driverId': 'antonelli',
+                    'givenName': 'Andrea Kimi',
+                    'familyName': 'Antonelli',
+                    'nationality': 'Italian',
+                  },
+                  'Constructors': <Map<String, dynamic>>[
+                    <String, dynamic>{
+                      'constructorId': 'mercedes',
+                      'name': 'Mercedes',
+                      'nationality': 'German',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+
+    expect(response.rows.single.driver.driverId, 'antonelli');
+    expect(response.rows.single.constructorId, 'mercedes');
+    expect(response.rows.single.pointsValue, 390);
   });
 
   test('Jolpica 赛历响应能解析练习赛与排位赛时间', () {

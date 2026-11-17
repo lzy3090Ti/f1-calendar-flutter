@@ -35,13 +35,17 @@ class StandingsRepositoryImpl implements StandingsRepository {
   }
 
   @override
-  Future<List<ConstructorStanding>> getStandings({bool forceRefresh = false}) async {
+  Future<List<ConstructorStanding>> getStandings({
+    bool forceRefresh = false,
+  }) async {
     final entry = cache.readEntry();
     final cached = cache.readStandings();
     final previousPositions = cache.readPositions();
 
     final hasUsableCache = cached != null && cached.isNotEmpty;
-    if (!forceRefresh && hasUsableCache && (entry?.isFresh(cacheTtl) ?? false)) {
+    if (!forceRefresh &&
+        hasUsableCache &&
+        (entry?.isFresh(cacheTtl) ?? false)) {
       return _decorate(cached, previousPositions);
     }
 
@@ -66,10 +70,12 @@ class StandingsRepositoryImpl implements StandingsRepository {
     List<ConstructorStanding> rows,
     Map<String, int> previousPositions,
   ) {
-    return rows.map((row) {
-      final previous = previousPositions[row.constructorId];
-      if (previous == null) return row;
-      return row.copyWith(positionChange: previous - row.positionValue);
-    }).toList(growable: false);
+    return rows
+        .map((row) {
+          final previous = previousPositions[row.constructorId];
+          if (previous == null) return row;
+          return row.copyWith(positionChange: previous - row.positionValue);
+        })
+        .toList(growable: false);
   }
 }

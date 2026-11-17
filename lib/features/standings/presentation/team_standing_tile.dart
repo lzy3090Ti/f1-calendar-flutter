@@ -4,10 +4,9 @@ import '../../../app/theme.dart';
 import '../../../shared/models/team_asset.dart';
 import '../../../shared/widgets/animated_count.dart';
 import '../../../shared/widgets/car_image.dart';
-import '../../../shared/widgets/team_color_bar.dart';
 import '../domain/standing.dart';
 
-/// 积分榜行：队色竖条 + 名次 + 队名 + 车图缩略 + 积分 + 名次变化箭头。
+/// 车队积分海报卡，赛车保持 contain，避免图片被裁成中央一截。
 class TeamStandingTile extends StatelessWidget {
   const TeamStandingTile({
     super.key,
@@ -20,115 +19,141 @@ class TeamStandingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final team = teamAssetFor(standing.constructorId);
+    final palette = context.palette;
+    final start = Color.lerp(team.color, palette.canvas, 0.55)!;
+    final end = Color.lerp(team.color, const Color(0xFF11131A), 0.8)!;
+    final textTheme = Theme.of(context).textTheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
-          child: Container(
-            decoration: context.cardDecoration(),
-            padding: const EdgeInsets.fromLTRB(12, 10, 14, 10),
-            child: Row(
-              children: <Widget>[
-                TeamColorBar(color: team.color, height: 44),
-                const SizedBox(width: 12),
-                SizedBox(
-                  width: 24,
-                  child: Text(
-                    standing.position,
-                    style: textTheme.titleLarge?.copyWith(
-                      fontFeatures: const <FontFeature>[
-                        FontFeature.tabularFigures(),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: SizedBox(
+              height: 168,
+              child: Stack(
+                children: <Widget>[
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: <Color>[start, end],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: const SizedBox.expand(),
+                  ),
+                  Positioned(
+                    right: 18,
+                    top: 6,
+                    child: Text(
+                      standing.positionText,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.17),
+                        fontSize: 132,
+                        height: 0.9,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    left: 18,
+                    top: 17,
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                          width: 4,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.72),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              team.nameZh,
+                              style: textTheme.titleLarge?.copyWith(
+                                color: Colors.white,
+                                fontSize: 21,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              team.name,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.84),
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        team.nameZh,
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        team.name,
-                        style: textTheme.labelSmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                CarImage(
-                  team: team,
-                  width: 240,
-                  memCacheWidth: 240,
-                  height: 32,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                ),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    AnimatedCount(
-                      value: standing.pointsValue,
-                      style: textTheme.displaySmall,
+                  Positioned(
+                    left: 16,
+                    right: 106,
+                    bottom: 8,
+                    height: 70,
+                    child: CarImage(
+                      team: team,
+                      width: 720,
+                      memCacheWidth: 720,
+                      height: 70,
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
                     ),
-                    const SizedBox(height: 2),
-                    _PositionChange(change: standing.positionChange),
-                  ],
-                ),
-              ],
+                  ),
+                  Positioned(
+                    right: 16,
+                    bottom: 17,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        AnimatedCount(
+                          value: standing.pointsValue,
+                          style: textTheme.displaySmall?.copyWith(
+                            color: Colors.white,
+                            fontSize: 34,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            'PTS',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    right: 17,
+                    top: 15,
+                    child: Text(
+                      '#${standing.positionText}',
+                      style: textTheme.labelMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _PositionChange extends StatelessWidget {
-  const _PositionChange({required this.change});
-
-  final int change;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    if (change == 0) {
-      return Text('—', style: textTheme.labelSmall);
-    }
-    final up = change > 0;
-    final color = up ? const Color(0xFF2E7D32) : const Color(0xFFC62828);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Icon(
-          up ? Icons.arrow_upward : Icons.arrow_downward,
-          size: 11,
-          color: color,
-        ),
-        const SizedBox(width: 2),
-        Text(
-          '${change.abs()}',
-          style: textTheme.labelSmall?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }

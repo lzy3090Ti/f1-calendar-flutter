@@ -7,6 +7,7 @@ import '../features/calendar/presentation/race_detail_page.dart';
 import '../features/calendar/domain/race.dart';
 import '../features/standings/presentation/standings_page.dart';
 import '../features/standings/presentation/team_detail_page.dart';
+import '../features/widgets/widget_settings_page.dart';
 import 'theme.dart';
 
 final Provider<GoRouter> routerProvider = Provider<GoRouter>(
@@ -28,6 +29,11 @@ GoRouter createRouter() {
                 pageBuilder: (context, state) =>
                     _fadePage(const CalendarPage()),
                 routes: <RouteBase>[
+                  GoRoute(
+                    path: 'widgets',
+                    pageBuilder: (context, state) =>
+                        _fadePage(const WidgetSettingsPage()),
+                  ),
                   GoRoute(
                     path: 'race/:round',
                     pageBuilder: (context, state) =>

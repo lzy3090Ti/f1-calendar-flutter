@@ -81,10 +81,7 @@ class TeamDetailPage extends ConsumerWidget {
                   ),
                   _StatDivider(color: palette.divider),
                   Expanded(
-                    child: _StatCell(
-                      label: '胜场',
-                      value: standing?.wins ?? '—',
-                    ),
+                    child: _StatCell(label: '胜场', value: standing?.wins ?? '—'),
                   ),
                 ],
               ),
@@ -140,11 +137,7 @@ class TeamDetailPage extends ConsumerWidget {
 }
 
 class _StatCell extends StatelessWidget {
-  const _StatCell({
-    required this.label,
-    required this.value,
-    this.animated,
-  });
+  const _StatCell({required this.label, required this.value, this.animated});
 
   final String label;
   final String value;

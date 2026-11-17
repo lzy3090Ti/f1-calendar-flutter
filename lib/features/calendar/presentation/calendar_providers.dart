@@ -10,6 +10,7 @@ import '../domain/get_next_race.dart';
 import '../domain/race.dart';
 import '../domain/race_repository.dart';
 import '../domain/race_result.dart';
+import '../../widgets/widget_sync_service.dart';
 
 final Provider<RaceApi> raceApiProvider = Provider<RaceApi>(
   (ref) => RaceApi(ref.watch(dioProvider)),
@@ -49,6 +50,7 @@ class RacesNotifier extends AsyncNotifier<List<Race>> {
     final repository = ref.watch(raceRepositoryProvider);
     final cached = await repository.readCachedRaces();
     if (cached != null && cached.isNotEmpty) {
+      unawaited(WidgetSyncService.syncRace(cached));
       if (await repository.isCacheStale()) {
         // 延迟到 build 完成后再写 state，避免在构建期更新状态。
         unawaited(
@@ -60,7 +62,9 @@ class RacesNotifier extends AsyncNotifier<List<Race>> {
       }
       return cached;
     }
-    return repository.getRaces();
+    final fresh = await repository.getRaces();
+    unawaited(WidgetSyncService.syncRace(fresh));
+    return fresh;
   }
 
   /// 下拉刷新：保留当前内容，失败时由页面提示，不把页面变成错误态。
@@ -69,6 +73,7 @@ class RacesNotifier extends AsyncNotifier<List<Race>> {
     final previous = state;
     try {
       final fresh = await repository.getRaces(forceRefresh: true);
+      unawaited(WidgetSyncService.syncRace(fresh));
       state = AsyncData<List<Race>>(fresh);
     } on Object {
       state = previous;

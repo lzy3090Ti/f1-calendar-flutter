@@ -44,7 +44,11 @@ class DriverAsset {
     required this.code,
     required this.name,
     required this.nameZh,
+    this.id = '',
   });
+
+  /// Jolpica/Ergast 的 driverId，用于把真实积分映射到官方素材。
+  final String id;
 
   /// 素材路径中的车手代码，例如 `georus01`。
   final String code;
@@ -52,7 +56,7 @@ class DriverAsset {
   final String nameZh;
 
   String avatarUrl({String slug = '', int width = 440}) =>
-      'https://media.formula1.com/image/upload/c_lfill,w_$width/q_auto/v1740000001/'
+      'https://media.formula1.com/image/upload/c_fit,w_$width/q_auto/v1740000001/'
       'common/f1/${TeamAsset.seasonSegment}/$slug/$code/'
       '${TeamAsset.seasonSegment}$slug${code}right.webp';
 }
@@ -185,6 +189,30 @@ final Map<String, TeamAsset> _teamAssetsById = <String, TeamAsset>{
   for (final team in teamAssets) team.id: team,
 };
 
+const Map<String, String> _driverCodeById = <String, String>{
+  'russell': 'georus01',
+  'antonelli': 'andant01',
+  'hamilton': 'lewham01',
+  'leclerc': 'chalec01',
+  'verstappen': 'maxver01',
+  'hadjar': 'isahad01',
+  'norris': 'lannor01',
+  'piastri': 'oscpia01',
+  'lawson': 'lialaw01',
+  'lindblad': 'arvlin01',
+  'gasly': 'piegas01',
+  'colapinto': 'fracol01',
+  'bearman': 'olibea01',
+  'bortoleto': 'gabbor01',
+  'hulkenberg': 'nichul01',
+  'albon': 'alealb01',
+  'sainz': 'carsai01',
+  'alonso': 'feralo01',
+  'stroll': 'lanstr01',
+  'bottas': 'valbot01',
+  'perez': 'serper01',
+};
+
 /// 未知车队（接口新增或改名）返回灰色兜底，UI 不会因此崩溃。
 TeamAsset teamAssetFor(String constructorId) {
   final found = _teamAssetsById[constructorId];
@@ -197,4 +225,15 @@ TeamAsset teamAssetFor(String constructorId) {
     colorHex: 0xFF9E9E9E,
     drivers: const <DriverAsset>[],
   );
+}
+
+/// 将接口中的 driverId 映射为官方照片素材；未知车手沿用车队兜底头像。
+DriverAsset? driverAssetFor(String driverId, String constructorId) {
+  final team = teamAssetFor(constructorId);
+  final code = _driverCodeById[driverId];
+  if (code == null) return team.drivers.isEmpty ? null : team.drivers.first;
+  for (final driver in team.drivers) {
+    if (driver.code == code) return driver;
+  }
+  return team.drivers.isEmpty ? null : team.drivers.first;
 }

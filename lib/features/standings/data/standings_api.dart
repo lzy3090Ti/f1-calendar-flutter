@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import 'driver_standings_response.dart';
 import 'standings_response.dart';
 
 part 'standings_api.g.dart';
@@ -12,6 +13,11 @@ abstract class StandingsApi {
 
   @GET('/{season}/constructorStandings.json')
   Future<StandingsResponse> fetchConstructorStandings(
+    @Path('season') String season, {
+    @Query('limit') String limit = '100',
+  });
+  @GET('/{season}/driverStandings.json')
+  Future<DriverStandingsResponse> fetchDriverStandings(
     @Path('season') String season, {
     @Query('limit') String limit = '100',
   });
